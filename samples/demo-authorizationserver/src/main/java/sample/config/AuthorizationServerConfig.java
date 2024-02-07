@@ -125,6 +125,7 @@ public class AuthorizationServerConfig {
 			.oauth2ResourceServer(oauth2ResourceServer ->
 				oauth2ResourceServer.jwt(Customizer.withDefaults()));
 		// @formatter:on
+		// http.sessionManagement(cfgr -> cfgr.maximumSessions(1).maxSessionsPreventsLogin(false));
 		return http.build();
 	}
 

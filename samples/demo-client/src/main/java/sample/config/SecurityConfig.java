@@ -57,6 +57,7 @@ public class SecurityConfig {
 			.oauth2Client(withDefaults())
 			.logout(logout ->
 				logout.logoutSuccessHandler(oidcLogoutSuccessHandler(clientRegistrationRepository)));
+		http.sessionManagement(cfgr -> cfgr.maximumSessions(1).maxSessionsPreventsLogin(false));
 		return http.build();
 	}
 	// @formatter:on

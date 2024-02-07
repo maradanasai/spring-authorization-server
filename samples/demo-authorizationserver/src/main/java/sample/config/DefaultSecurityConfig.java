@@ -57,7 +57,8 @@ public class DefaultSecurityConfig {
 				oauth2Login
 					.loginPage("/login")
 					.successHandler(authenticationSuccessHandler())
-			);
+			)
+				.sessionManagement(cfgr -> cfgr.maximumSessions(1).maxSessionsPreventsLogin(false));
 
 		return http.build();
 	}
