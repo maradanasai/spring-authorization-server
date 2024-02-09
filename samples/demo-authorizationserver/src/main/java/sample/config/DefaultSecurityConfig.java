@@ -15,6 +15,9 @@
  */
 package sample.config;
 
+import org.springframework.session.data.redis.RedisIndexedSessionRepository;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisIndexedHttpSession;
+import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 import sample.federation.FederatedIdentityAuthenticationSuccessHandler;
 
 import org.springframework.context.annotation.Bean;
@@ -38,6 +41,7 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
  */
 @EnableWebSecurity
 @Configuration(proxyBeanMethods = false)
+@EnableRedisIndexedHttpSession
 public class DefaultSecurityConfig {
 
 	// @formatter:off
@@ -57,8 +61,7 @@ public class DefaultSecurityConfig {
 				oauth2Login
 					.loginPage("/login")
 					.successHandler(authenticationSuccessHandler())
-			)
-				.sessionManagement(cfgr -> cfgr.maximumSessions(1).maxSessionsPreventsLogin(false));
+			);//.sessionManagement(cfgr -> cfgr.maximumSessions(1).maxSessionsPreventsLogin(false).expiredUrl("http://localhost:8080"));
 
 		return http.build();
 	}
@@ -81,8 +84,8 @@ public class DefaultSecurityConfig {
 	// @formatter:on
 
 	@Bean
-	public SessionRegistry sessionRegistry() {
-		return new SessionRegistryImpl();
+	public SessionRegistry sessionRegistry(RedisIndexedSessionRepository repository) {
+		return new SpringSessionBackedSessionRegistry<>(repository);
 	}
 
 	@Bean

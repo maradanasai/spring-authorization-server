@@ -20,10 +20,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.session.data.redis.RedisIndexedSessionRepository;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisIndexedHttpSession;
+import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -35,6 +40,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
  */
 @EnableWebSecurity
 @Configuration(proxyBeanMethods = false)
+@EnableRedisIndexedHttpSession
 public class SecurityConfig {
 
 	@Bean
@@ -57,7 +63,7 @@ public class SecurityConfig {
 			.oauth2Client(withDefaults())
 			.logout(logout ->
 				logout.logoutSuccessHandler(oidcLogoutSuccessHandler(clientRegistrationRepository)));
-		http.sessionManagement(cfgr -> cfgr.maximumSessions(1).maxSessionsPreventsLogin(false));
+		http.sessionManagement(cfgr -> cfgr.maximumSessions(1).maxSessionsPreventsLogin(false).expiredUrl("http://localhost:8080"));
 		return http.build();
 	}
 	// @formatter:on
@@ -74,4 +80,13 @@ public class SecurityConfig {
 		return oidcLogoutSuccessHandler;
 	}
 
+	@Bean
+	public SessionRegistry sessionRegistry(RedisIndexedSessionRepository sessionRepository) {
+		return new SpringSessionBackedSessionRegistry<>(sessionRepository);
+	}
+
+	@Bean
+	public HttpSessionEventPublisher httpSessionEventPublisher() {
+		return new HttpSessionEventPublisher();
+	}
 }
